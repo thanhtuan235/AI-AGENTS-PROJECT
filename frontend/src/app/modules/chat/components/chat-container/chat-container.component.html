@@ -1,0 +1,76 @@
+<div class="chatbot-layout">
+  <!-- Sidebar Trái: Lịch sử hội thoại -->
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <button class="btn-new-chat">+ Cuộc trò chuyện mới</button>
+    </div>
+    <div class="chat-history-list">
+      <div class="history-item active">Tra cứu quy định công tác phí</div>
+      <div class="history-item">Quy trình cấp phát laptop</div>
+      <div class="history-item">Tra cứu trạng thái hồ sơ #1024</div>
+    </div>
+  </div>
+
+  <!-- Khu vực Chat chính -->
+  <div class="chat-main">
+    <div class="chat-header">
+      <h3>🤖 BANCA eOFFICE AI ASSISTANT</h3>
+      <span class="user-info">Cán bộ: Nguyễn Văn A (Phòng HR)</span>
+    </div>
+
+    <div class="chat-messages">
+      <!-- Tin nhắn Bot chào mừng -->
+      <div class="message bot-message">
+        <div class="avatar">🤖</div>
+        <div class="content">
+          <p>
+            Xin chào anh A! Em là trợ lý AI Hành chính eOffice. Em có thể hỗ trợ
+            gì cho anh hôm nay?
+          </p>
+        </div>
+      </div>
+
+      <!-- Tin nhắn User -->
+      <div class="message user-message">
+        <div class="avatar">👤</div>
+        <div class="content">
+          <p>Cho tôi biết hạn mức công tác phí đi Hà Nội?</p>
+        </div>
+      </div>
+
+      <!-- Tin nhắn Bot phản hồi RAG -->
+      <div class="message bot-message">
+        <div class="avatar">🤖</div>
+        <div class="content">
+          <p>
+            Theo <strong>Quy định QD-2024-NH/01</strong>, hạn mức công tác phí
+            tại Hà Nội áp dụng như sau:
+          </p>
+          <ul>
+            <li><strong>Phụ cấp lưu trú:</strong> 300,000 VNĐ/ngày</li>
+            <li><strong>Hạn mức thuê phòng ở:</strong> 1,200,000 VNĐ/đêm</li>
+          </ul>
+
+          <div class="citation-box">
+            📌 <strong>Nguồn trích dẫn:</strong>
+            <a href="#">[1] QD-2024-NH/01_QuyDinhCongTacPhi.pdf (Trang 12)</a>
+          </div>
+
+          <div class="action-suggestions">
+            <button class="btn-action">📝 Tạo đề nghị thanh toán</button>
+            <button class="btn-action">📄 Tải biểu mẫu công tác</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Khung nhập liệu -->
+    <div class="chat-input-area">
+      <input
+        type="text"
+        placeholder="Nhập câu hỏi hành chính hoặc tra cứu quy trình..."
+      />
+      <button class="btn-send">Gửi</button>
+    </div>
+  </div>
+</div>
