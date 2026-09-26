@@ -1,0 +1,59 @@
+<div class="admin-kb-container">
+  <div class="header">
+    <h2>📚 KHO TRI THỨC HÀNH CHÍNH (RAG KNOWLEDGE BASE)</h2>
+    <button class="btn-upload">+ Tải lên tài liệu mới (PDF/DOCX)</button>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" placeholder="🔍 Tìm kiếm file/quy định..." />
+    <select>
+      <option value="">-- Tất cả phòng ban --</option>
+      <option value="HR">Phòng Nhân sự</option>
+      <option value="IT">Phòng Công nghệ</option>
+      <option value="ADMIN">Phòng Hành chính Tổng hợp</option>
+    </select>
+  </div>
+
+  <table class="kb-table">
+    <thead>
+      <tr>
+        <th>Tên tài liệu</th>
+        <th>Mã văn bản</th>
+        <th>Ngày hiệu lực</th>
+        <th>Trạng thái RAG</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>📄 Quy định công tác phí 2024</td>
+        <td>QD-2024-NH/01</td>
+        <td>01/01/2024</td>
+        <td><span class="badge success">Indexed (120 chunks)</span></td>
+        <td>
+          <button class="btn-action">Sửa</button>
+          <button class="btn-action danger">Xóa</button>
+        </td>
+      </tr>
+      <tr>
+        <td>📄 Hướng dẫn cấp phát thiết bị IT</td>
+        <td>HD-2023-IT/05</td>
+        <td>15/05/2023</td>
+        <td><span class="badge success">Indexed (45 chunks)</span></td>
+        <td>
+          <button class="btn-action">Sửa</button>
+          <button class="btn-action danger">Xóa</button>
+        </td>
+      </tr>
+      <tr>
+        <td>📄 Quy trình duyệt nghỉ phép Online</td>
+        <td>QT-2024-NS/02</td>
+        <td>10/02/2024</td>
+        <td><span class="badge warning">Processing...</span></td>
+        <td>
+          <button class="btn-action">Thử lại</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
