@@ -8,7 +8,7 @@ Service AI Agent sử dụng **FastAPI** + **LangChain/LangGraph**, kết nối 
 - **FastAPI** — REST API framework
 - **LangChain / LangGraph** — xây dựng agent flow
 - **Langfuse** — tracing/observability cho LLM calls
-- **Ollama** — chạy LLM local (model hiện dùng: `qwen3:latest`)
+- **Ollama** — chạy LLM local (model hiện dùng: `llama3`)
 
 ## Cấu trúc thư mục
     ai-service/
@@ -29,7 +29,7 @@ Service AI Agent sử dụng **FastAPI** + **LangChain/LangGraph**, kết nối 
 - [Ollama](https://ollama.com/) đã cài đặt và đang chạy (`ollama serve`)
 - Model đã pull sẵn, ví dụ:
 ```bash
-  ollama pull qwen3
+  ollama pull llama3
 ```
 
 ## Cài đặt
@@ -50,7 +50,7 @@ Tạo file `.env` ở thư mục gốc:
 ```env
 OLLAMA_BASE_URL=http://localhost:11434/v1
 OLLAMA_API_KEY=ollama
-OLLAMA_MODEL=qwen3:latest
+OLLAMA_MODEL=llama3
 
 LANGFUSE_PUBLIC_KEY=
 LANGFUSE_SECRET_KEY=
@@ -102,7 +102,7 @@ Gửi tin nhắn tới LLM (qua Ollama) và nhận phản hồi.
 
 ## Ghi chú
 
-- Model mặc định: `qwen3:latest` — có thể đổi qua biến `OLLAMA_MODEL` trong `.env`.
+- Model mặc định: `llama3` — có thể đổi qua biến `OLLAMA_MODEL` trong `.env`.
 - Port mặc định `8001` để tránh xung đột với `backend` (.NET, port 5000/5001) và `frontend` (Angular, port 4200).
 - Không commit file `.env` (đã được `.gitignore` loại trừ).
 

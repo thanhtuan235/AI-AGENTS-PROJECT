@@ -5,6 +5,7 @@ llm = ChatOpenAI(
     base_url=OLLAMA_BASE_URL,
     api_key=OLLAMA_API_KEY,
     model=OLLAMA_MODEL,
+    temperature=0.7,
 )
 
 if __name__ == "__main__":
