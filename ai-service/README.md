@@ -52,9 +52,9 @@ OLLAMA_BASE_URL=http://localhost:11434/v1
 OLLAMA_API_KEY=ollama
 OLLAMA_MODEL=llama3
 
-LANGFUSE_PUBLIC_KEY=
-LANGFUSE_SECRET_KEY=
-LANGFUSE_HOST=https://cloud.langfuse.com
+LANGFUSE_SECRET_KEY="sk-lf-c89ef21f-572a-48d6-bc57-a8e42abb18e7"
+LANGFUSE_PUBLIC_KEY="pk-lf-752e77c3-148f-46dc-ad05-9a1d700cac1c"
+LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"
 ```
 
 ## Chạy thử kết nối Ollama
