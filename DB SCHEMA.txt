@@ -1,0 +1,22 @@
+STT | Đối tượng                         | Thiếu gì                                              | Cần cho                              
+----+-----------------------------------+-------------------------------------------------------+--------------------------------------+
+ 1  | Bảng WorkflowSteps                | Cả bảng: Id, RequestId, StepName, ApproverRole,       | get_workflow_steps, thống kê nghẽn   |
+    |                                   | Status, UpdatedAt                                     |                                      |
+ 2  | Bảng Feedback                     | Cả bảng: Id, ChatSessionId, MessageId, Rating,        | submit_feedback                      | 
+    |                                   | Comment, CreatedAt                                    |                                      |
+ 3  | Requests.Status                   | Giá trị 'Cancelled' (hiện: Pending, ManagerApproved,  | cancel_request                       | 
+    |                                   | Rejected, Completed)                                  |                                      |
+ 4  | FormTemplates                     | Cột mô tả field bắt buộc (vd FieldsJson); hiện chỉ    | get_form_template                    | 
+    |                                   | có Title, Category, DownloadUrl                       |                                      |
+ 5  | ChatMessages                      | Cột lưu nguồn trích dẫn (vd SourcesJson)              | UI hiển thị nguồn trích dẫn          | 
+ 6  | View vw_RequestStats              | Requests không có DepartmentId; phòng ban nằm ở       | Thống kê theo phòng ban              |
+    |                                   | Users.DepartmentId. Cần view nối Requests-Users-      |                                      |
+    |                                   | Departments, ẩn cột cá nhân                           |                                      |
+ 7  | Requests (ngày nghỉ)              | StartDate/EndDate nằm trong chuỗi JSON PayloadDetail, | Lọc/thống kê theo ngày nghỉ          | 
+    |                                   | không truy vấn trực tiếp được                         |                                      |
+ 8  | Liên kết FormTemplates-Requests   | Không có cột/bảng nối                                 | Thống kê mức độ dùng biểu mẫu        | 
+ 9  | Bảng Rooms (hoặc danh mục phòng)  | Chưa có; room_id đang là chuỗi tự do                  | RoomBooking                          | 
+10  | Ràng buộc Status/RequestType      | nvarchar(max) tự do, không CHECK hay bảng lookup      | Tránh lệch giá trị (Leave vs leave)  | 
+11  | Khóa ngoại                        | Departments.ManagerId, RequestStatusHistories.        | Toàn vẹn dữ liệu                     | 
+    |                                   | ChangedByUserId không có FK                           |                                      |
+12  | Bảng Roles                        | Kế hoạch có, schema không; Role là chuỗi ở Users.Role | Không cần cho agent                  | 
