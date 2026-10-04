@@ -1,0 +1,77 @@
+.admin-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .admin-header {
+    margin-bottom: 16px;
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 22px;
+      color: #1a237e;
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  .tab-icon {
+    margin-right: 8px;
+  }
+
+  .tab-content {
+    padding-top: 20px;
+
+    .table-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      .search-box {
+        width: 360px;
+        margin-bottom: -1.25em;
+      }
+    }
+
+    .table-card {
+      padding: 0;
+      overflow: hidden;
+      border-radius: 8px;
+
+      table {
+        width: 100%;
+        th {
+          font-weight: 600;
+          color: #424242;
+          background-color: #fafafa;
+        }
+      }
+    }
+  }
+
+  /* Status Badge Styling */
+  .status-chip {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.indexed,
+    &.approved {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    &.processing {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+    &.pending-approval {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+  }
+}
