@@ -1,76 +1,106 @@
-<div class="chatbot-layout">
-  <!-- Sidebar Trái: Lịch sử hội thoại -->
-  <div class="chat-sidebar">
-    <div class="sidebar-header">
-      <button class="btn-new-chat">+ Cuộc trò chuyện mới</button>
+<div class="chat-wrapper">
+  <!-- Header Trợ lý AI -->
+  <div class="chat-header">
+    <div class="brand">
+      <mat-icon class="bot-icon">smart_toy</mat-icon>
+      <div>
+        <h2>Trợ lý Hành chính eOffice</h2>
+        <span class="status-online"
+          ><span class="dot"></span> Đang hoạt động</span
+        >
+      </div>
     </div>
-    <div class="chat-history-list">
-      <div class="history-item active">Tra cứu quy định công tác phí</div>
-      <div class="history-item">Quy trình cấp phát laptop</div>
-      <div class="history-item">Tra cứu trạng thái hồ sơ #1024</div>
+    <div class="user-profile">
+      <mat-icon>account_circle</mat-icon>
+      <span>Nguyễn Văn A (Phòng Nhân sự)</span>
     </div>
   </div>
 
-  <!-- Khu vực Chat chính -->
-  <div class="chat-main">
-    <div class="chat-header">
-      <h3>🤖 BANCA eOFFICE AI ASSISTANT</h3>
-      <span class="user-info">Cán bộ: Nguyễn Văn A (Phòng HR)</span>
-    </div>
-
-    <div class="chat-messages">
-      <!-- Tin nhắn Bot chào mừng -->
-      <div class="message bot-message">
-        <div class="avatar">🤖</div>
-        <div class="content">
-          <p>
-            Xin chào anh A! Em là trợ lý AI Hành chính eOffice. Em có thể hỗ trợ
-            gì cho anh hôm nay?
-          </p>
-        </div>
-      </div>
-
-      <!-- Tin nhắn User -->
-      <div class="message user-message">
-        <div class="avatar">👤</div>
-        <div class="content">
-          <p>Cho tôi biết hạn mức công tác phí đi Hà Nội?</p>
-        </div>
-      </div>
-
-      <!-- Tin nhắn Bot phản hồi RAG -->
-      <div class="message bot-message">
-        <div class="avatar">🤖</div>
-        <div class="content">
-          <p>
-            Theo <strong>Quy định QD-2024-NH/01</strong>, hạn mức công tác phí
-            tại Hà Nội áp dụng như sau:
-          </p>
-          <ul>
-            <li><strong>Phụ cấp lưu trú:</strong> 300,000 VNĐ/ngày</li>
-            <li><strong>Hạn mức thuê phòng ở:</strong> 1,200,000 VNĐ/đêm</li>
-          </ul>
-
-          <div class="citation-box">
-            📌 <strong>Nguồn trích dẫn:</strong>
-            <a href="#">[1] QD-2024-NH/01_QuyDinhCongTacPhi.pdf (Trang 12)</a>
-          </div>
-
-          <div class="action-suggestions">
-            <button class="btn-action">📝 Tạo đề nghị thanh toán</button>
-            <button class="btn-action">📄 Tải biểu mẫu công tác</button>
-          </div>
-        </div>
+  <!-- Khung hiển thị Tin nhắn -->
+  <div class="chat-conversation">
+    <!-- Bot Message: Chào mừng -->
+    <div class="chat-bubble bot">
+      <div class="avatar"><mat-icon>smart_toy</mat-icon></div>
+      <div class="bubble-content">
+        <p>
+          Xin chào anh A! Em có thể hỗ trợ anh tra cứu quy định, thủ tục hành
+          chính hoặc trạng thái hồ sơ trên eOffice hôm nay?
+        </p>
       </div>
     </div>
 
-    <!-- Khung nhập liệu -->
-    <div class="chat-input-area">
+    <!-- User Message -->
+    <div class="chat-bubble user">
+      <div class="bubble-content">
+        <p>Cho tôi biết hạn mức công tác phí đi Hà Nội và mẫu giấy đi đường?</p>
+      </div>
+      <div class="avatar"><mat-icon>person</mat-icon></div>
+    </div>
+
+    <!-- Bot Message RAG Trả lời kèm Citation & Actions -->
+    <div class="chat-bubble bot">
+      <div class="avatar"><mat-icon>smart_toy</mat-icon></div>
+      <div class="bubble-content">
+        <p>
+          Theo <strong>Quy định QD-2024-NH/01</strong>, hạn mức công tác phí tại
+          khu vực Hà Nội được quy định như sau:
+        </p>
+        <ul>
+          <li><strong>Phụ cấp lưu trú:</strong> 300,000 VNĐ/ngày</li>
+          <li><strong>Tiền thuê phòng ở:</strong> Tối đa 1,200,000 VNĐ/đêm</li>
+        </ul>
+
+        <!-- Thẻ nguồn trích dẫn (Source Citation) -->
+        <div class="citation-card">
+          <div class="citation-title">
+            <mat-icon class="cite-icon">menu_book</mat-icon>
+            <span>Nguồn trích dẫn chính thức từ eOffice:</span>
+          </div>
+          <a class="citation-link" href="javascript:void(0)">
+            <mat-icon class="file-icon">picture_as_pdf</mat-icon>
+            <span
+              >[1] QD-2024-NH/01_QuyDinhCongTacPhi.pdf (Trang 12, Điều 5)</span
+            >
+          </a>
+        </div>
+
+        <!-- Gợi ý hành động eOffice -->
+        <div class="action-buttons">
+          <button mat-stroked-button color="primary">
+            <mat-icon>post_add</mat-icon> Tạo đề nghị công tác
+          </button>
+          <button mat-stroked-button>
+            <mat-icon>download</mat-icon> Tải Biểu mẫu Giấy đi đường
+          </button>
+        </div>
+
+        <!-- Thanh Feedback Like / Dislike -->
+        <div class="feedback-bar">
+          <span class="feedback-label">Câu trả lời có hữu ích không?</span>
+          <button mat-icon-button matTooltip="Hữu ích" color="primary">
+            <mat-icon>thumb_up_off_alt</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Chưa chính xác" color="warn">
+            <mat-icon>thumb_down_off_alt</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Khung Nhập Lệnh Chat -->
+  <div class="chat-input-box">
+    <mat-form-field appearance="outline" class="input-field">
+      <mat-label
+        >Nhập câu hỏi hành chính hoặc mã hồ sơ cần tra cứu...</mat-label
+      >
       <input
-        type="text"
-        placeholder="Nhập câu hỏi hành chính hoặc tra cứu quy trình..."
+        matInput
+        placeholder="Ví dụ: Quy trình thanh toán chi phí tiếp khách"
       />
-      <button class="btn-send">Gửi</button>
-    </div>
+      <button mat-icon-button matSuffix color="primary">
+        <mat-icon>send</mat-icon>
+      </button>
+    </mat-form-field>
   </div>
 </div>
