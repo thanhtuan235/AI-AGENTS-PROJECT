@@ -74,7 +74,7 @@ Mô tả: Các yêu cầu (nghỉ phép/mua sắm/đặt phòng) của nhân vi�
 Cột:
 - Id (int, khóa chính)
 - RequestType (nvarchar): 'Leave' | 'Purchase' | 'RoomBooking'
-- Status (nvarchar): 'Pending' | 'ManagerApproved' | 'Rejected' | 'Completed'
+- Status (nvarchar): 'Pending' | 'ManagerApproved' | 'Rejected' | 'Completed' | 'Cancelled'
 - CreatedAt (datetime2): thời điểm tạo yêu cầu, lưu theo giờ UTC
 
 ────────────────────────────────────────
