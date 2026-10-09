@@ -128,6 +128,39 @@ namespace eOfficeChatbot.Api.Migrations
                     b.ToTable("Documents");
                 });
 
+            modelBuilder.Entity("eOfficeChatbot.Api.Models.Feedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChatSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatSessionId");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("Feedbacks");
+                });
+
             modelBuilder.Entity("eOfficeChatbot.Api.Models.FormTemplate", b =>
                 {
                     b.Property<int>("Id")
@@ -141,6 +174,10 @@ namespace eOfficeChatbot.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DownloadUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FieldsJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -260,6 +297,39 @@ namespace eOfficeChatbot.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("eOfficeChatbot.Api.Models.WorkflowStep", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApproverRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StepName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId");
+
+                    b.ToTable("WorkflowSteps");
+                });
+
             modelBuilder.Entity("eOfficeChatbot.Api.Models.ChatMessage", b =>
                 {
                     b.HasOne("eOfficeChatbot.Api.Models.ChatSession", "ChatSession")
@@ -280,6 +350,25 @@ namespace eOfficeChatbot.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("eOfficeChatbot.Api.Models.Feedback", b =>
+                {
+                    b.HasOne("eOfficeChatbot.Api.Models.ChatSession", "ChatSession")
+                        .WithMany()
+                        .HasForeignKey("ChatSessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("eOfficeChatbot.Api.Models.ChatMessage", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ChatSession");
+
+                    b.Navigation("Message");
                 });
 
             modelBuilder.Entity("eOfficeChatbot.Api.Models.Request", b =>
@@ -315,6 +404,17 @@ namespace eOfficeChatbot.Api.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("eOfficeChatbot.Api.Models.WorkflowStep", b =>
+                {
+                    b.HasOne("eOfficeChatbot.Api.Models.Request", "Request")
+                        .WithMany("WorkflowSteps")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Request");
+                });
+
             modelBuilder.Entity("eOfficeChatbot.Api.Models.ChatSession", b =>
                 {
                     b.Navigation("Messages");
@@ -328,6 +428,8 @@ namespace eOfficeChatbot.Api.Migrations
             modelBuilder.Entity("eOfficeChatbot.Api.Models.Request", b =>
                 {
                     b.Navigation("StatusHistories");
+
+                    b.Navigation("WorkflowSteps");
                 });
 #pragma warning restore 612, 618
         }
