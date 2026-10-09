@@ -6,5 +6,6 @@ namespace eOfficeChatbot.Api.Models
         public string Title { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty; // VD: "Leave", "Purchase", "RoomBooking"
         public string DownloadUrl { get; set; } = string.Empty;
+        public string FieldsJson { get; set; } = "[]"; // MỚI: Mảng JSON chứa tên các field cần thiết
     }
 }

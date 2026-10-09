@@ -16,5 +16,6 @@ namespace eOfficeChatbot.Api.Models
 
         public User? User { get; set; }
         public ICollection<RequestStatusHistory> StatusHistories { get; set; } = new List<RequestStatusHistory>();
+        public ICollection<WorkflowStep> WorkflowSteps { get; set; } = new List<WorkflowStep>();
     }
 }
