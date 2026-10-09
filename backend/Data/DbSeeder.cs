@@ -31,23 +31,24 @@ namespace eOfficeChatbot.Api.Data
             deptIT.ManagerId = managerIT.Id;
             context.SaveChanges();
 
-            // 3. Tạo Documents & Form Templates (Để AI Agent có cái tra cứu)
+            /// 3. Tạo Documents & Form Templates (Chuẩn hóa tên Category theo tài liệu)
             context.Documents.Add(new Document 
             { 
                 Title = "Quy định nghỉ phép 2026", 
-                Category = "NhanSu", 
+                Category = "NhanSu", // Viết liền, không dấu
                 Summary = "Nhân viên chính thức có 12 ngày phép/năm. Nghỉ quá 3 ngày cần báo trước 1 tuần.", 
                 ContentUrl = "/docs/quy-dinh-nghi-phep.pdf" 
             });
             context.FormTemplates.Add(new FormTemplate 
             { 
                 Title = "Mẫu Đơn Xin Nghỉ Phép", 
-                Category = "Leave", 
-                DownloadUrl = "/forms/don-xin-nghi-phep.docx" 
+                Category = "Leave", // Phải khớp với RequestType
+                DownloadUrl = "/forms/don-xin-nghi-phep.docx",
+                FieldsJson = "[\"StartDate\", \"EndDate\", \"Reason\"]" // Agent sẽ dùng mảng này để hỏi user
             });
             context.SaveChanges();
 
-            // 4. Tạo các Request (Dùng JSON để linh hoạt lưu chi tiết)
+            // 4. Tạo các Request (Thử nghiệm trạng thái Cancelled)
             var leaveRequest = new Request 
             { 
                 UserId = dev1.Id, 
@@ -56,19 +57,28 @@ namespace eOfficeChatbot.Api.Data
                 PayloadDetail = "{\"StartDate\":\"2026-10-05\", \"EndDate\":\"2026-10-05\", \"Reason\":\"Đi khám sức khỏe định kỳ\"}", 
                 Status = "Pending" 
             };
-            context.Requests.Add(leaveRequest);
+            var cancelledRequest = new Request 
+            { 
+                UserId = dev1.Id, 
+                RequestType = "Leave", 
+                Title = "Xin nghỉ phép đi du lịch", 
+                PayloadDetail = "{\"StartDate\":\"2026-11-05\", \"EndDate\":\"2026-11-06\", \"Reason\":\"Việc cá nhân\"}", 
+                Status = "Cancelled" // Trạng thái hủy
+            };
+            context.Requests.AddRange(leaveRequest, cancelledRequest);
             context.SaveChanges();
 
-            // 5. Ghi Log lịch sử Request
-            context.RequestStatusHistories.Add(new RequestStatusHistory 
-            { 
-                RequestId = leaveRequest.Id, 
-                ChangedByUserId = dev1.Id, 
-                OldStatus = "Draft", 
-                NewStatus = "Pending", 
-                Note = "Gửi đơn cho sếp duyệt" 
+            // 5. Khởi tạo Workflow Steps cho đơn Pending
+            context.WorkflowSteps.Add(new WorkflowStep
+            {
+                RequestId = leaveRequest.Id,
+                StepName = "Quản lý trực tiếp duyệt",
+                ApproverRole = "Manager",
+                Status = "Pending"
             });
             context.SaveChanges();
+
+            
         }
     }
 }
