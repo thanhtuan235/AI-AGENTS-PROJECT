@@ -39,7 +39,7 @@ namespace eOfficeChatbot.Api.Controllers
                 query = query.Where(f => f.Category == category);
 
             var forms = await query
-                .Select(f => new { f.Id, f.Title, f.DownloadUrl })
+                .Select(f => new { f.Id, f.Title, f.Category, f.DownloadUrl, f.FieldsJson })
                 .ToListAsync();
 
             return Ok(forms);

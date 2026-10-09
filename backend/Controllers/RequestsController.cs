@@ -89,5 +89,30 @@ namespace eOfficeChatbot.Api.Controllers
                 Status = newRequest.Status 
             });
         }
+        // PUT: api/requests/{id}/cancel
+        [HttpPut("{id}/cancel")]
+        public async Task<IActionResult> CancelRequest(int id)
+        {
+            var request = await _context.Requests.FindAsync(id);
+            if (request == null) return NotFound(new { Message = "Không tìm thấy đơn." });
+
+            if (request.Status != "Pending") 
+                return BadRequest(new { Message = "Chỉ có thể hủy đơn đang ở trạng thái Pending." });
+
+            request.Status = "Cancelled";
+            
+            // Ghi log vào lịch sử
+            _context.RequestStatusHistories.Add(new RequestStatusHistory
+            {
+                RequestId = request.Id,
+                ChangedByUserId = request.UserId,
+                OldStatus = "Pending",
+                NewStatus = "Cancelled",
+                Note = "User yêu cầu hủy thông qua Chatbot"
+            });
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Hủy đơn thành công", RequestId = request.Id, Status = request.Status });
+        }
     }
 }
