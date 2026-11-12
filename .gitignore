@@ -26,3 +26,8 @@ dist/
 .angular/
 npm-debug.log*
 yarn-error.log*
+
+# Claude Code
+CLAUDE.md
+CLAUDE.local.md
+.claude/
