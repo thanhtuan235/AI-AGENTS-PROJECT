@@ -21,6 +21,16 @@ services:
       retries: 12
       start_period: 40s
     restart: unless-stopped
+  ollama:
+    image: ollama/ollama:latest
+    container_name: eoffice-ollama
+    profiles: ["ollama"]          # chỉ chạy khi có --profile ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
 
 volumes:
   sqldata:
+  ollama:
