@@ -44,3 +44,22 @@ GO
 
 PRINT N'Phần 1 OK: KnowledgeChunks';
 GO
+
+/* ---------- Phần 2: Full-text index ---------- */
+IF FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') = 1
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM sys.fulltext_catalogs WHERE name = N'ftKnowledge')
+        CREATE FULLTEXT CATALOG ftKnowledge WITH ACCENT_SENSITIVITY = OFF;
+
+    IF NOT EXISTS (SELECT 1 FROM sys.fulltext_indexes
+                   WHERE object_id = OBJECT_ID(N'dbo.KnowledgeChunks'))
+        CREATE FULLTEXT INDEX ON dbo.KnowledgeChunks
+            (Heading LANGUAGE 0, Content LANGUAGE 0)
+            KEY INDEX PK_KnowledgeChunks ON ftKnowledge
+            WITH CHANGE_TRACKING AUTO;
+
+    PRINT N'Phần 2 OK: Full-text index';
+END
+ELSE
+    PRINT N'Phần 2 BỎ QUA: Full-Text Search chưa được cài';
+GO
