@@ -139,3 +139,40 @@ PowerShell 5.1 có thể hiển thị tiếng Việt thành `ChÃ o báº¡n` �
 - Image được ghim ở `2025-CU11-ubuntu-24.04` để cả nhóm dùng cùng một bản. Muốn nâng CU: sửa tag, cả nhóm cùng `pull`.
 - `bge-m3` cho vector **1024 chiều** – khớp `EMBEDDING_DIM` và cột `VECTOR(1024)`. Đổi model embedding nghĩa là phải đổi schema và nhúng lại toàn bộ dữ liệu.
 - SQL Server bị giới hạn 2 GB RAM (`MSSQL_MEMORY_LIMIT_MB`).
+
+## Vector & Full-text (A6)
+
+### Image SQL Server có Full-Text Search
+Image chính thức không có Full-Text Search. `infra/sqlserver/Dockerfile` cài thêm gói `mssql-server-fts`
+(nâng engine lên 17.0.5065.9). Image nặng thêm khoảng 3 GB, nên ổ chứa dữ liệu Docker cần còn ít nhất 10 GB trống.
+Nếu ổ C không đủ chỗ: Docker Desktop → Settings → Resources → Advanced → Disk image location → chọn ổ khác.
+
+Luôn chạy compose kèm file `.env` ở thư mục gốc:
+```powershell
+docker compose --env-file .env -f infra/docker-compose.yml up -d --build
+```
+
+### Tạo schema
+```powershell
+docker cp infra/sql/chatbotdb_vector.sql eoffice-sql:/tmp/
+docker exec -it eoffice-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<SA>" -C -b -f 65001 -i /tmp/chatbotdb_vector.sql
+```
+Script chạy lại nhiều lần không lỗi. Kết quả tạo ra:
+- Bảng `KnowledgeChunks` có cột `Embedding VECTOR(1024)`
+- Index lọc theo quyền
+- Full-text index trên `Heading` và `Content`: `LANGUAGE 0` (neutral), `ACCENT_SENSITIVITY = OFF`
+
+### Kết quả kiểm thử
+| Kiểm thử | Kết quả |
+|---|---|
+| Vector (`bge-m3`, cosine), `tests/vector_smoke_test.py` | 3/3 PASS. Kết quả đúng có distance 0.30–0.40, cách kết quả thứ 2 khoảng 0.15 |
+| Full-text, `tests/fulltext_smoke_test.sql` | `CONTAINS` có dấu và không dấu đều đúng; `FREETEXTTABLE` xếp đúng thứ tự |
+
+**Kết luận:** vector search và full-text search đều chạy được trong SQL Server, nên giữ nguyên thiết kế
+hybrid search trong report.
+
+### Lưu ý cho nhóm
+- `KnowledgeChunks` do script này tạo. **Không đưa vào EF migration**; nếu cần map entity thì dùng `ExcludeFromMigrations()`.
+- Bảng `Faqs` (B3) cần cột `Embedding VECTOR(1024) NULL`. `AccessLevel` dùng `TINYINT`, cùng ý nghĩa với `KnowledgeChunks`.
+- `FREETEXTTABLE` có thể trả về dòng `RANK = 0` (khớp một từ lẻ). Phase 2 nên lọc bỏ các dòng này.
+- Không chạy `docker volume prune` hoặc `docker system prune --volumes` vì sẽ mất dữ liệu.

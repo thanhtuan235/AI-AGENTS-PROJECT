@@ -63,3 +63,8 @@ END
 ELSE
     PRINT N'Phần 2 BỎ QUA: Full-Text Search chưa được cài';
 GO
+
+/* ---------- Phần 3: Faqs.Embedding ----------
+   CHỜ B3: thêm sau khi BE tạo bảng Faqs.
+   Cột cần có: Embedding VECTOR(1024) NULL
+   ------------------------------------------------ */
