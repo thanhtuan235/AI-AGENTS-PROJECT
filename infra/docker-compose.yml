@@ -2,7 +2,9 @@ name: eoffice
 
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2025-CU11-ubuntu-24.04
+    build:
+      context: ./sqlserver
+    image: eoffice-sql-fts:2025
     container_name: eoffice-sql
     hostname: eoffice-sql
     environment:
