@@ -1,5 +1,4 @@
 <div class="chat-wrapper">
-  <!-- Header Trợ lý AI -->
   <div class="chat-header">
     <div class="brand">
       <mat-icon class="bot-icon">smart_toy</mat-icon>
@@ -16,79 +15,23 @@
     </div>
   </div>
 
-  <!-- Khung hiển thị Tin nhắn -->
   <div class="chat-conversation">
-    <!-- Bot Message: Chào mừng -->
-    <div class="chat-bubble bot">
-      <div class="avatar"><mat-icon>smart_toy</mat-icon></div>
-      <div class="bubble-content">
-        <p>
-          Xin chào anh A! Em có thể hỗ trợ anh tra cứu quy định, thủ tục hành
-          chính hoặc trạng thái hồ sơ trên eOffice hôm nay?
-        </p>
+    <div
+      class="chat-bubble"
+      [class.user]="chat.role === 'user'"
+      [class.bot]="chat.role === 'assistant'"
+      *ngFor="let chat of messages">
+      <div class="avatar" *ngIf="chat.role === 'assistant'">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div class="bubble-content"><p>{{ chat.content }}</p></div>
+      <div class="avatar" *ngIf="chat.role === 'user'">
+        <mat-icon>person</mat-icon>
       </div>
     </div>
-
-    <!-- User Message -->
-    <div class="chat-bubble user">
-      <div class="bubble-content">
-        <p>Cho tôi biết hạn mức công tác phí đi Hà Nội và mẫu giấy đi đường?</p>
-      </div>
-      <div class="avatar"><mat-icon>person</mat-icon></div>
-    </div>
-
-    <!-- Bot Message RAG Trả lời kèm Citation & Actions -->
-    <div class="chat-bubble bot">
-      <div class="avatar"><mat-icon>smart_toy</mat-icon></div>
-      <div class="bubble-content">
-        <p>
-          Theo <strong>Quy định QD-2024-NH/01</strong>, hạn mức công tác phí tại
-          khu vực Hà Nội được quy định như sau:
-        </p>
-        <ul>
-          <li><strong>Phụ cấp lưu trú:</strong> 300,000 VNĐ/ngày</li>
-          <li><strong>Tiền thuê phòng ở:</strong> Tối đa 1,200,000 VNĐ/đêm</li>
-        </ul>
-
-        <!-- Thẻ nguồn trích dẫn (Source Citation) -->
-        <div class="citation-card">
-          <div class="citation-title">
-            <mat-icon class="cite-icon">menu_book</mat-icon>
-            <span>Nguồn trích dẫn chính thức từ eOffice:</span>
-          </div>
-          <a class="citation-link" href="javascript:void(0)">
-            <mat-icon class="file-icon">picture_as_pdf</mat-icon>
-            <span
-              >[1] QD-2024-NH/01_QuyDinhCongTacPhi.pdf (Trang 12, Điều 5)</span
-            >
-          </a>
-        </div>
-
-        <!-- Gợi ý hành động eOffice -->
-        <div class="action-buttons">
-          <button mat-stroked-button color="primary">
-            <mat-icon>post_add</mat-icon> Tạo đề nghị công tác
-          </button>
-          <button mat-stroked-button>
-            <mat-icon>download</mat-icon> Tải Biểu mẫu Giấy đi đường
-          </button>
-        </div>
-
-        <!-- Thanh Feedback Like / Dislike -->
-        <div class="feedback-bar">
-          <span class="feedback-label">Câu trả lời có hữu ích không?</span>
-          <button mat-icon-button matTooltip="Hữu ích" color="primary">
-            <mat-icon>thumb_up_off_alt</mat-icon>
-          </button>
-          <button mat-icon-button matTooltip="Chưa chính xác" color="warn">
-            <mat-icon>thumb_down_off_alt</mat-icon>
-          </button>
-        </div>
-      </div>
-    </div>
+    <div class="sending" *ngIf="isSending">Đang xử lý…</div>
   </div>
 
-  <!-- Khung Nhập Lệnh Chat -->
   <div class="chat-input-box">
     <mat-form-field appearance="outline" class="input-field">
       <mat-label
@@ -96,9 +39,11 @@
       >
       <input
         matInput
-        placeholder="Ví dụ: Quy trình thanh toán chi phí tiếp khách"
+        [(ngModel)]="message"
+        (keyup.enter)="sendMessage()"
+        placeholder="Nhập câu hỏi hành chính"
       />
-      <button mat-icon-button matSuffix color="primary">
+      <button mat-icon-button matSuffix color="primary" (click)="sendMessage()" [disabled]="isSending">
         <mat-icon>send</mat-icon>
       </button>
     </mat-form-field>

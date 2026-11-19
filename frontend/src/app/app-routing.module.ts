@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'chat', pathMatch: 'full' },
+  { path: '', redirectTo: 'admin/dashboard', pathMatch: 'full' },
   {
     path: 'chat',
     loadChildren: () =>
@@ -13,7 +13,7 @@ const routes: Routes = [
     loadChildren: () =>
       import('./modules/admin/admin.module').then((m) => m.AdminModule),
   },
-  { path: '**', redirectTo: 'chat' },
+  { path: '**', redirectTo: 'admin/dashboard' },
 ];
 
 @NgModule({
