@@ -2,9 +2,10 @@
 import os
 from typing import Dict, Any, Optional
 import httpx
+from app.config import settings
 
-USE_MOCK = os.getenv("USE_MOCK", "true").lower() == "true"
-BASE_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
+USE_MOCK = settings.use_mock
+BASE_URL = settings.chatbot_backend_url
 
 class OfficeService:
     def __init__(self, base_url: str = BASE_URL):

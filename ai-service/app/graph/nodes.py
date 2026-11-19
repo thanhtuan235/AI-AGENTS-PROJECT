@@ -104,7 +104,7 @@ def _parse_llm_json(raw_text: str) -> Dict[str, Any]:
 # Intent detection node
 # ==========================================
 
-def detect_intent(state: NodeState) -> Dict[str, Any]:
+async def detect_intent(state: NodeState) -> Dict[str, Any]:
     question = state.get("question") or (
         state["messages"][-1].content if state.get("messages") else ""
     )
@@ -131,7 +131,7 @@ def detect_intent(state: NodeState) -> Dict[str, Any]:
 
     for attempt in range(max_retries):
         try:
-            response = llm.invoke(messages)
+            response = await llm.ainvoke(messages)
             raw_content = response.content
             data = _parse_llm_json(raw_content)
             validated = IntentToolCall(**data)
@@ -198,7 +198,7 @@ Quy tắc trình bày:
 - Nếu là câu hỏi chào hỏi/xã giao (chitchat), hãy chào lại thân thiện và giới thiệu ngắn gọn các chức năng có thể hỗ trợ (tra cứu quy chế, xem trạng thái đơn, tạo yêu cầu nghỉ phép, mua sắm,...).
 """
 
-def generate_answer_node(state: NodeState) -> Dict[str, Any]:
+async def generate_answer_node(state: NodeState) -> Dict[str, Any]:
     question = state.get("question") or (
         state["messages"][-1].content if state.get("messages") else ""
     )
@@ -226,7 +226,7 @@ def generate_answer_node(state: NodeState) -> Dict[str, Any]:
         HumanMessage(content=prompt_content)
     ]
 
-    response = llm.invoke(messages)
+    response = await llm.ainvoke(messages)
     return {
         "answer": response.content,
         "messages": [AIMessage(content=response.content)] 

@@ -1,12 +1,49 @@
-from dotenv import load_dotenv
-import os
+from functools import lru_cache
+from pathlib import Path
 
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "ollama")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
+# ai-service/app/config.py -> parents[2] = thư mục gốc repo (nơi đặt .env chung)
+ROOT_ENV = Path(__file__).resolve().parents[2] / ".env"
+LOCAL_ENV = Path(__file__).resolve().parents[1] / ".env"  # tùy chọn, để ghi đè riêng
 
-LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
-LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
-LANGFUSE_HOST = os.getenv("LANGFUSE_BASE_URL")
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=(ROOT_ENV, LOCAL_ENV),  # file sau ghi đè file trước
+        env_file_encoding="utf-8",
+        extra="ignore",                  # .env chung có biến của .NET → bỏ qua
+    )
+
+    # Ollama
+    ollama_base_url: str = "http://localhost:11434/v1"
+    ollama_api_key: str = "ollama"
+    ollama_model: str = "qwen2.5:3b"
+    embedding_model: str = "bge-m3"
+    embedding_dim: int = 1024
+
+    # Langfuse
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    langfuse_host: str = "https://cloud.langfuse.com"
+
+    # JWT (dùng ở A3)
+    jwt_key: str = ""
+    jwt_issuer: str = "eoffice-mock"
+    jwt_audience: str = "eoffice-chatbot"
+
+    # Backend (dùng ở A4)
+    chatbot_backend_url: str = "http://localhost:5100"
+    http_timeout: float = 10.0
+
+    # Cờ
+    use_mock: bool = True
+    enable_write_tools: bool = False
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()
