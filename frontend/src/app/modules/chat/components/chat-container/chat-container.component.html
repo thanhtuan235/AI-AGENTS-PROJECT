@@ -1,51 +1,90 @@
 <div class="chat-wrapper">
-  <div class="chat-header">
-    <div class="brand">
-      <mat-icon class="bot-icon">smart_toy</mat-icon>
-      <div>
-        <h2>Trợ lý Hành chính eOffice</h2>
-        <span class="status-online"
-          ><span class="dot"></span> Đang hoạt động</span
-        >
-      </div>
-    </div>
-    <div class="user-profile">
-      <mat-icon>account_circle</mat-icon>
-      <span>Nguyễn Văn A (Phòng Nhân sự)</span>
-    </div>
-  </div>
-
-  <div class="chat-conversation">
-    <div
-      class="chat-bubble"
-      [class.user]="chat.role === 'user'"
-      [class.bot]="chat.role === 'assistant'"
-      *ngFor="let chat of messages">
-      <div class="avatar" *ngIf="chat.role === 'assistant'">
-        <mat-icon>smart_toy</mat-icon>
-      </div>
-      <div class="bubble-content"><p>{{ chat.content }}</p></div>
-      <div class="avatar" *ngIf="chat.role === 'user'">
-        <mat-icon>person</mat-icon>
-      </div>
-    </div>
-    <div class="sending" *ngIf="isSending">Đang xử lý…</div>
-  </div>
-
-  <div class="chat-input-box">
-    <mat-form-field appearance="outline" class="input-field">
-      <mat-label
-        >Nhập câu hỏi hành chính hoặc mã hồ sơ cần tra cứu...</mat-label
-      >
-      <input
-        matInput
-        [(ngModel)]="message"
-        (keyup.enter)="sendMessage()"
-        placeholder="Nhập câu hỏi hành chính"
-      />
-      <button mat-icon-button matSuffix color="primary" (click)="sendMessage()" [disabled]="isSending">
-        <mat-icon>send</mat-icon>
+  <aside class="session-sidebar">
+    <button mat-raised-button color="accent" type="button" (click)="createSession()">
+      <mat-icon>add</mat-icon>
+      Phiên mới
+    </button>
+    <div class="session-list">
+      <button
+        *ngFor="let session of sessions"
+        type="button"
+        class="session-item"
+        [class.active]="session.id === currentSessionId"
+        (click)="openSession(session)">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <span>{{ session.title }}</span>
       </button>
-    </mat-form-field>
-  </div>
+    </div>
+  </aside>
+
+  <main class="chat-main">
+    <div class="chat-header">
+      <div class="brand">
+        <mat-icon class="bot-icon">smart_toy</mat-icon>
+        <div>
+          <h2>Trợ lý Hành chính eOffice</h2>
+          <span class="status-online"><span class="dot"></span> Đang hoạt động</span>
+        </div>
+      </div>
+      <div class="user-profile">
+        <mat-icon>account_circle</mat-icon>
+        <span class="user-info" *ngIf="user">
+          <strong>{{ user.name }}</strong>
+          <small>{{ user.role }}</small>
+        </span>
+        <button mat-stroked-button type="button" (click)="logout()" aria-label="Đăng xuất">
+          <mat-icon>logout</mat-icon>
+          <span>Đăng xuất</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-conversation">
+      <div class="history-loading" *ngIf="isLoadingHistory">Đang tải lịch sử…</div>
+      <div
+        class="chat-bubble"
+        [class.user]="chat.role === 'user'"
+        [class.bot]="chat.role === 'assistant'"
+        *ngFor="let chat of messages">
+        <div class="avatar" *ngIf="chat.role === 'assistant'">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        <div class="bubble-content">
+          <markdown [data]="chat.content"></markdown>
+          <div class="sources" *ngIf="chat.sources?.length">
+            <div class="sources-title">Nguồn tham khảo</div>
+            <a *ngFor="let source of chat.sources" [href]="source.url || '#'" target="_blank">
+              {{ source.title }}
+            </a>
+          </div>
+        </div>
+        <div class="avatar" *ngIf="chat.role === 'user'">
+          <mat-icon>person</mat-icon>
+        </div>
+      </div>
+      <div class="sending" *ngIf="isSending">
+        <span class="typing-dots"><i></i><i></i><i></i></span>
+        Trợ lý đang soạn…
+      </div>
+      <div class="chat-error" *ngIf="errorMessage">
+        <mat-icon>error_outline</mat-icon>
+        {{ errorMessage }}
+      </div>
+    </div>
+
+    <div class="chat-input-box">
+      <mat-form-field appearance="outline" class="input-field">
+        <mat-label>Nhập câu hỏi hành chính hoặc mã hồ sơ cần tra cứu...</mat-label>
+        <input
+          matInput
+          [(ngModel)]="message"
+          (keyup.enter)="sendMessage()"
+          placeholder="Nhập câu hỏi hành chính"
+          [disabled]="isSending"/>
+        <button mat-icon-button matSuffix color="primary" (click)="sendMessage()" [disabled]="isSending">
+          <mat-icon>send</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </main>
 </div>

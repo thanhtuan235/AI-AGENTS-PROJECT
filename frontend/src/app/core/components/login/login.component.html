@@ -1,11 +1,49 @@
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <mat-form-field>
-    <input matInput formControlName="username" placeholder="Tên đăng nhập">
-  </mat-form-field>
-  <mat-form-field>
-    <input matInput type="password" formControlName="password" placeholder="Mật khẩu">
-  </mat-form-field>
-  <button mat-raised-button color="primary" type="submit" [disabled]="submitting">
-    Đăng nhập
-  </button>
-</form>
+<div class="login-page">
+  <mat-card class="login-card">
+    <div class="login-brand">
+      <div class="brand-icon"><mat-icon>smart_toy</mat-icon></div>
+      <h1>eOffice Chatbot</h1>
+      <p>Đăng nhập hệ thống hỗ trợ hành chính</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Tên đăng nhập</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput formControlName="username" autocomplete="username">
+        <mat-error *ngIf="form.get('username')?.hasError('required')">
+          Vui lòng nhập tên đăng nhập
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mật khẩu</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput [type]="hidePassword ? 'password' : 'text'"
+               formControlName="password" autocomplete="current-password">
+        <button mat-icon-button matSuffix type="button"
+                (click)="hidePassword = !hidePassword"
+                [attr.aria-label]="hidePassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'">
+          <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.get('password')?.hasError('required')">
+          Vui lòng nhập mật khẩu
+        </mat-error>
+      </mat-form-field>
+
+      <div class="login-error" *ngIf="errorMessage">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <button class="login-button" mat-raised-button color="primary"
+              type="submit" [disabled]="submitting">
+        {{ submitting ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+      </button>
+    </form>
+
+    <div class="seed-hint">
+      Tài khoản mẫu: <b>hr1</b>, <b>truongphong.it</b>, <b>dev1</b> — mật khẩu: <b>123456</b>
+    </div>
+  </mat-card>
+</div>

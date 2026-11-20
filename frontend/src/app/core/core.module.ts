@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { LoginComponent } from './components/login/login.component';
 import { AuthService } from './services/auth.service';
 import { JwtInterceptor } from './interceptors/jwt.interceptor';
@@ -22,6 +24,8 @@ import { RoleGuard } from './guards/role.guard';
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,
+    MatIconModule,
+    MatCardModule,
   ],
   providers: [
     AuthService,
