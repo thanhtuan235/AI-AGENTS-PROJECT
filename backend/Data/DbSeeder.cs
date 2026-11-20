@@ -1,5 +1,7 @@
 using eOfficeChatbot.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace eOfficeChatbot.Api.Data
 {
@@ -10,22 +12,22 @@ namespace eOfficeChatbot.Api.Data
             // Tự động chạy Migration nếu chưa chạy (Rất tiện khi team làm việc chung)
             context.Database.Migrate();
 
-            // Kiểm tra nếu đã có User thì bỏ qua để không sinh trùng lặp
-            if (context.Users.Any()) return;
-
             // 1. Tạo phòng ban
-            var deptIT = new Department { Name = "Phòng Công nghệ Thông tin" };
-            var deptHR = new Department { Name = "Phòng Hành chính - Nhân sự" };
-            context.Departments.AddRange(deptIT, deptHR);
-            context.SaveChanges(); // Lưu để EF Core tự sinh Id
-
-            // 2. Tạo Users (Role: Admin, Manager, Employee)
-            var managerIT = new User { Username = "truongphong.it", FullName = "Nguyễn Văn Trưởng", Email = "manager.it@eoffice.vn", Role = "Manager", DepartmentId = deptIT.Id };
-            var dev1 = new User { Username = "dev1", FullName = "Trần Hữu Nguyên Sơn", Email = "dev1@eoffice.vn", Role = "Employee", DepartmentId = deptIT.Id };
-            var hr1 = new User { Username = "hr1", FullName = "Lê Thị C", Email = "hr1@eoffice.vn", Role = "Employee", DepartmentId = deptHR.Id };
-            
-            context.Users.AddRange(managerIT, dev1, hr1);
+            var deptIT = context.Departments.FirstOrDefault(d => d.Name == "Phòng Công nghệ Thông tin")
+                ?? new Department { Name = "Phòng Công nghệ Thông tin" };
+            var deptHR = context.Departments.FirstOrDefault(d => d.Name == "Phòng Hành chính - Nhân sự")
+                ?? new Department { Name = "Phòng Hành chính - Nhân sự" };
+            if (deptIT.Id == 0) context.Departments.Add(deptIT);
+            if (deptHR.Id == 0) context.Departments.Add(deptHR);
             context.SaveChanges();
+
+            // 2. Đảm bảo luôn có đúng 3 tài khoản mẫu
+            var managerIT = EnsureUser(context, "truongphong.it", "Nguyễn Văn Trưởng", "manager.it@eoffice.vn", "Manager", deptIT.Id);
+            var dev1 = EnsureUser(context, "dev1", "Trần Hữu Nguyên Sơn", "dev1@eoffice.vn", "Employee", deptIT.Id);
+            var hr1 = EnsureUser(context, "hr1", "Lê Thị C", "hr1@eoffice.vn", "Admin", deptHR.Id);
+            context.SaveChanges();
+
+            if (context.Documents.Any()) return;
 
             // Gán Manager cho phòng IT
             deptIT.ManagerId = managerIT.Id;
@@ -79,6 +81,29 @@ namespace eOfficeChatbot.Api.Data
             context.SaveChanges();
 
             
+        }
+
+        private static User EnsureUser(AppDbContext context, string username, string fullName, string email, string role, int departmentId)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                user = new User { Username = username };
+                context.Users.Add(user);
+            }
+
+            user.FullName = fullName;
+            user.Email = email;
+            user.Role = role;
+            user.DepartmentId = departmentId;
+            user.PasswordHash = HashPassword("123456");
+            return user;
+        }
+
+        public static string HashPassword(string password)
+        {
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+            return Convert.ToHexString(bytes).ToLowerInvariant();
         }
     }
 }

@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  aiUrl: 'http://localhost:8001',
+  backendUrl: 'http://localhost:5100',
+  eofficeUrl: 'http://localhost:5200'
 };
 
 /*
