@@ -1,156 +1,98 @@
-<div class="admin-container">
-  <div class="admin-header">
-    <h1>
-      <mat-icon>admin_panel_settings</mat-icon> HỆ THỐNG QUẢN TRỊ CHATBOT &
-      eOFFICE
-    </h1>
-  </div>
+<div class="office-shell">
+  <aside class="office-sidebar">
+    <div class="brand">
+      <div class="brand-mark"><mat-icon>account_balance</mat-icon></div>
+      <div><strong>eOffice</strong><span>Trợ lý hành chính AI</span></div>
+    </div>
 
-  <mat-tab-group animationDuration="200ms" color="primary">
-    <!-- TAB 1: DỮ LIỆU TÀI LIỆU RAG -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">folder_special</mat-icon> Kho Tri Thức RAG
-        (Documents)
-      </ng-template>
+    <nav class="main-nav" aria-label="Điều hướng eOffice">
+      <a class="nav-item active"><mat-icon>home</mat-icon><span>Trang chủ</span></a>
+      <a class="nav-item"><mat-icon>inbox</mat-icon><span>Hồ sơ của tôi</span></a>
+      <a class="nav-item"><mat-icon>calendar_today</mat-icon><span>Lịch làm việc</span></a>
+      <a class="nav-item"><mat-icon>description</mat-icon><span>Văn bản nội bộ</span></a>
+      <a class="nav-item"><mat-icon>people_outline</mat-icon><span>Danh bạ</span></a>
+      <a class="nav-item"><mat-icon>settings</mat-icon><span>Cài đặt</span></a>
+    </nav>
 
-      <div class="tab-content">
-        <div class="table-actions">
-          <mat-form-field appearance="outline" class="search-box">
-            <mat-label>Tìm kiếm tài liệu quy định...</mat-label>
-            <input matInput placeholder="Tên văn bản hoặc mã quy định" />
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
-          <button mat-raised-button color="primary">
-            <mat-icon>upload_file</mat-icon> Upload Tài Liệu Mới
-          </button>
-        </div>
+    <div class="sidebar-footer"><p>An Việt Bank<br />Cổng nội bộ eOffice 2026</p></div>
+  </aside>
 
-        <mat-card class="table-card">
-          <table
-            mat-table
-            [dataSource]="documentsList"
-            class="mat-elevation-z0"
-          >
-            <ng-container matColumnDef="title">
-              <th mat-header-cell *matHeaderCellDef>Tên Tài Liệu / Quy Định</th>
-              <td mat-cell *matCellDef="let doc">
-                <strong>{{ doc.title }}</strong>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="code">
-              <th mat-header-cell *matHeaderCellDef>Mã Văn Bản</th>
-              <td mat-cell *matCellDef="let doc">{{ doc.code }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="effectiveDate">
-              <th mat-header-cell *matHeaderCellDef>Ngày Hiệu Lực</th>
-              <td mat-cell *matCellDef="let doc">{{ doc.effectiveDate }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Trạng Thái RAG</th>
-              <td mat-cell *matCellDef="let doc">
-                <span class="status-chip" [ngClass]="doc.status.toLowerCase()">
-                  {{ doc.status }}
-                </span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Thao Tác</th>
-              <td mat-cell *matCellDef="let doc">
-                <button
-                  mat-icon-button
-                  color="primary"
-                  matTooltip="Xem chi tiết Chunks"
-                >
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Xóa tài liệu">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="documentColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: documentColumns"></tr>
-          </table>
-        </mat-card>
+  <main class="office-main">
+    <header class="topbar">
+      <div class="global-search"><span>Tìm kiếm hồ sơ, văn bản, đồng nghiệp…</span></div>
+      <mat-icon class="search-icon">search</mat-icon>
+      <mat-icon class="bell-icon">notifications_none</mat-icon>
+      <div class="account">
+        <strong>Minh Anh · AVB01842</strong>
       </div>
-    </mat-tab>
+    </header>
 
-    <!-- TAB 2: DANH SÁCH YÊU CẦU/HỒ SƠ eOFFICE -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">assignment</mat-icon> Tra Cứu Yêu Cầu eOffice
-        (Requests)
-      </ng-template>
-
-      <div class="tab-content">
-        <div class="table-actions">
-          <mat-form-field appearance="outline" class="search-box">
-            <mat-label>Tìm theo Mã hồ sơ / Người tạo...</mat-label>
-            <input matInput placeholder="REQ-1024" />
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
+    <section class="overview">
+      <div class="welcome-row">
+        <div>
+          <h1>Chào buổi sáng, Minh Anh</h1>
+          <p>Thứ Năm, 05 tháng 11 năm 2026 · Khối Vận hành</p>
         </div>
-
-        <mat-card class="table-card">
-          <table mat-table [dataSource]="requestsList" class="mat-elevation-z0">
-            <ng-container matColumnDef="requestId">
-              <th mat-header-cell *matHeaderCellDef>Mã Hồ Sơ</th>
-              <td mat-cell *matCellDef="let req">
-                <code>{{ req.requestId }}</code>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="creator">
-              <th mat-header-cell *matHeaderCellDef>Người Yêu Cầu</th>
-              <td mat-cell *matCellDef="let req">{{ req.creator }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="type">
-              <th mat-header-cell *matHeaderCellDef>Loại Yêu Cầu Hành Chính</th>
-              <td mat-cell *matCellDef="let req">{{ req.type }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="createdDate">
-              <th mat-header-cell *matHeaderCellDef>Ngày Khởi Tạo</th>
-              <td mat-cell *matCellDef="let req">{{ req.createdDate }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Tiến Độ Phê Duyệt</th>
-              <td mat-cell *matCellDef="let req">
-                <span
-                  class="status-chip req-status"
-                  [ngClass]="req.status.toLowerCase().replace(' ', '-')"
-                >
-                  {{ req.status }}
-                </span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Thao Tác</th>
-              <td mat-cell *matCellDef="let req">
-                <button
-                  mat-icon-button
-                  color="primary"
-                  matTooltip="Xem luồng xử lý Workflow"
-                >
-                  <mat-icon>account_tree</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="requestColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: requestColumns"></tr>
-          </table>
-        </mat-card>
+        <button class="primary-button"><mat-icon>add</mat-icon>Tạo hồ sơ mới</button>
       </div>
-    </mat-tab>
-  </mat-tab-group>
+
+      <div class="metric-grid">
+        <article class="metric-card" *ngFor="let metric of metrics">
+          <div class="metric-heading"><span>{{ metric.label }}</span><mat-icon [class]="metric.iconClass">{{ metric.icon }}</mat-icon></div>
+          <strong class="metric-value">{{ metric.value }}</strong>
+          <span class="metric-note">{{ metric.note }}</span>
+        </article>
+      </div>
+
+      <section class="panel recent-panel">
+        <div class="panel-title"><h2>Hồ sơ gần đây</h2><a>Xem tất cả →</a></div>
+        <div class="request-table">
+          <div class="request-row table-head"><span>Mã hồ sơ</span><span>Nội dung</span><span>Trạng thái</span></div>
+          <div class="request-row" *ngFor="let request of recentRequests">
+            <strong>{{ request.id }}</strong><span>{{ request.content }}</span><span>{{ request.status }}</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="info-grid">
+        <section class="panel notice">
+          <h3>Thông báo nội bộ</h3>
+          <div class="notice-row">
+            <mat-icon>campaign</mat-icon>
+            <div><strong>Cập nhật quy chế nghỉ phép phiên bản 2.1</strong><p>Khối Nhân sự · Hướng dẫn áp dụng từ ngày 01/10/2026.</p></div>
+            <span>Mới</span>
+          </div>
+        </section>
+        <section class="panel schedule">
+          <h3>Lịch làm việc</h3>
+          <span class="time-tag">Hôm nay · 05/11</span>
+          <strong>10:30 – 11:30</strong>
+          <p>Họp giao ban Vận hành<br />Phòng họp Hội An · Tầng 8</p>
+          <strong>14:00 – 15:00</strong>
+          <p>Rà soát quy trình hồ sơ<br />Phòng họp Sông Hồng · Tầng 6</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <section class="chat-widget" [class.minimized]="chatMinimized" [class.hidden]="!chatOpen" aria-label="eOffice Chatbot">
+    <header class="chat-widget-header">
+      <mat-icon>auto_awesome</mat-icon>
+      <div><strong>Trợ lý eOffice</strong><span>● Hoạt động</span></div>
+      <button aria-label="Thu nhỏ" (click)="chatMinimized = true"><mat-icon>remove</mat-icon></button>
+      <button aria-label="Phóng to" (click)="chatMinimized = false"><mat-icon>open_in_full</mat-icon></button>
+    </header>
+    <div class="chat-content">
+      <span class="chat-date">Hôm nay · 09:42</span>
+      <div class="user-message">Tôi cần làm gì để xin nghỉ phép 2 ngày?</div>
+      <div class="assistant-message">
+        <div class="assistant-label"><mat-icon>auto_awesome</mat-icon><strong>Trợ lý eOffice</strong></div>
+        <p>Bạn cần gửi đơn trước ít nhất 03 ngày làm việc và được Trưởng phòng phê duyệt. [1]</p>
+        <button class="source-chip">[1] Quy chế nghỉ phép · v2.1</button>
+        <div class="suggestion-row"><button>Tạo đơn nghỉ phép</button><button>Xem số dư phép</button></div>
+      </div>
+    </div>
+    <div class="chat-compose"><div><mat-icon>attach_file</mat-icon><span>Nhập câu hỏi…</span><button><mat-icon>arrow_upward</mat-icon>Gửi</button></div><a>Chatbot có thể sai sót, vui lòng đối chiếu nguồn</a></div>
+    <button class="chat-fullscreen"><mat-icon>open_in_new</mat-icon>Mở toàn màn hình</button>
+  </section>
 </div>

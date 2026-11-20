@@ -15,11 +15,13 @@ langfuse_handler = CallbackHandler()
 
 class ChatRequest(BaseModel):
     message: str
+    session_id: Optional[str] = None
 class ChatResponse(BaseModel):
     answer: str
     intent: Optional[str] = None
     tool_name: Optional[str] = None
     tool_args: Optional[Dict[str, Any]] = None
+    sources: list = []
 
 # ==========================================
 # API Endpoint
