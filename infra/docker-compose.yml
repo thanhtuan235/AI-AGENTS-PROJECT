@@ -1,0 +1,36 @@
+name: eoffice
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2025-CU11-ubuntu-24.04
+    container_name: eoffice-sql
+    hostname: eoffice-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Thiếu MSSQL_SA_PASSWORD trong .env}
+      MSSQL_MEMORY_LIMIT_MB: "2048"
+    ports:
+      - "${MSSQL_PORT:-1433}:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+  ollama:
+    image: ollama/ollama:latest
+    container_name: eoffice-ollama
+    profiles: ["ollama"]          # chỉ chạy khi có --profile ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  sqldata:
+  ollama:
