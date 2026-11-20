@@ -1,10 +1,16 @@
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException
+from fastapi import Depends
+from app.core.security import get_current_user, UserContext
 from langchain_core.messages import HumanMessage
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from pydantic import BaseModel
+import logging
+logger = logging.getLogger(__name__)
 
 from app.config import settings
 from app.graph.builder import graph
@@ -48,7 +54,10 @@ class ChatResponse(BaseModel):
 # ==========================================
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(payload: ChatRequest):
+async def chat_endpoint(payload: ChatRequest, user: UserContext = Depends(get_current_user)):
+    config = {"configurable": {"user_id": user.user_id, "role": user.role,
+                               "dept_id": user.dept_id, "token": user.token}}
+    
     question = payload.message.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Nội dung câu hỏi không được để trống")
@@ -60,7 +69,16 @@ async def chat_endpoint(payload: ChatRequest):
 
     try:
         final_state = await graph.ainvoke(
-            initial_state, config={"callbacks": get_callbacks()}
+            initial_state,
+            config = {
+                "callbacks": get_callbacks(),
+                "configurable": {
+                    "user_id": user.user_id,
+                    "role": user.role,
+                    "dept_id": user.dept_id,
+                    "token": user.token,
+                },
+            }
         )
         return ChatResponse(
             answer=final_state.get("answer") or "Xin lỗi, hệ thống không thể tạo câu trả lời.",
@@ -75,3 +93,10 @@ async def chat_endpoint(payload: ChatRequest):
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.exception_handler(HTTPException)
+async def http_error_handler(request: Request, exc: HTTPException):
+    error = exc.detail if isinstance(exc.detail, dict) else \
+            {"code": "INTERNAL_ERROR", "message": str(exc.detail)}
+    return JSONResponse(status_code=exc.status_code,
+                        content={"success": False, "data": None, "error": error})
