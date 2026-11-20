@@ -1,0 +1,11 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-form-field>
+    <input matInput formControlName="username" placeholder="Tên đăng nhập">
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput type="password" formControlName="password" placeholder="Mật khẩu">
+  </mat-form-field>
+  <button mat-raised-button color="primary" type="submit" [disabled]="submitting">
+    Đăng nhập
+  </button>
+</form>
