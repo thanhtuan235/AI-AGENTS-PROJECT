@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -44,6 +45,14 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+def _flag(name: str, default: str) -> bool:
+    return os.getenv(name, default).lower() in ("1", "true", "yes")
+
+CHATBOT_BACKEND_URL = os.getenv("CHATBOT_BACKEND_URL", "http://localhost:5100")   # Chatbot Backend
+BACKEND_TIMEOUT = float(os.getenv("BACKEND_TIMEOUT", "10"))
+USE_MOCK = _flag("USE_MOCK", "true")
+ENABLE_WRITE_TOOLS = _flag("ENABLE_WRITE_TOOLS", "false")
 
 
 settings = get_settings()
