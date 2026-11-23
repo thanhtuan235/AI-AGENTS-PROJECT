@@ -9,7 +9,7 @@ def get_backend_client():
     global _client
     if _client is None:
         _client = (MockBackendClient() if config.USE_MOCK
-                   else BackendClient(config.BACKEND_URL, config.BACKEND_TIMEOUT))
+                else BackendClient(config.CHATBOT_BACKEND_URL, config.BACKEND_TIMEOUT))
     return _client
 
 async def close_backend_client():

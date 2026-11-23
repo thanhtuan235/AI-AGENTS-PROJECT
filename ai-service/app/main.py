@@ -18,10 +18,8 @@ log = logging.getLogger(__name__)
 from app.config import settings
 from app.graph.builder import graph
 
-app = FastAPI(title="AI Service")
-
 @asynccontextmanager
-async def lifespan(app):
+async def lifespan(_app):
     yield
     await close_backend_client()
 
