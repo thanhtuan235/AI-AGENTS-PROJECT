@@ -79,3 +79,59 @@ def test_cau_hoi_rong_tra_400():
     r = TestClient(app).post("/chat", json={"message": "   "}, headers=header())
     assert r.status_code == 400
     assert r.json()["error"]["code"] == "VALIDATION_ERROR"
+
+def test_trace_id_khi_bat_langfuse(monkeypatch):
+    import app.main as main
+    from app.clients import get_backend_client
+
+    fake_llm(monkeypatch, ['{"tool_name": "chitchat"}', "Chào bạn"])
+    monkeypatch.setattr(main, "langfuse_enabled", True)
+
+    # Bắt lại trace_id mà /chat gửi sang Backend khi lưu tin trả lời
+    saved = {}
+    backend = get_backend_client()
+    original = backend.save_message
+
+    async def spy(token, session_id, role, content, **kw):
+        if role == "assistant":
+            saved["trace_id"] = kw.get("trace_id")
+        return await original(token, session_id, role, content, **kw)
+
+    monkeypatch.setattr(backend, "save_message", spy)
+
+    r = TestClient(app).post("/chat", json={"message": "xin chào"}, headers=header())
+
+    trace_id = r.json()["trace_id"]
+    assert isinstance(trace_id, str) and len(trace_id) == 32 
+    assert saved["trace_id"] == trace_id                       
+
+def test_thieu_token_tra_401_dinh_dang_chung():
+    r = TestClient(app).post("/chat", json={"message": "xin chào"})
+    assert r.status_code == 401
+    assert r.json() == {"success": False, "data": None,
+                        "error": {"code": "UNAUTHORIZED", "message": "Thiếu token."}}
+
+
+def test_body_sai_tra_422_dinh_dang_chung():
+    r = TestClient(app).post("/chat", json={"session_id": "abc"}, headers=header())
+    assert r.status_code == 422
+    body = r.json()
+    assert body["success"] is False and body["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_graph_loi_tra_500_thong_bao_chung(monkeypatch):
+    def boom(temperature=0.0):
+        raise RuntimeError("Ollama chết: connection refused 127.0.0.1:11434")
+    monkeypatch.setattr(nodes, "get_llm", boom)
+
+    r = TestClient(app).post("/chat", json={"message": "quy định công tác phí"}, headers=header())
+
+    assert r.status_code == 500
+    assert r.json()["error"] == {"code": "INTERNAL_ERROR",
+                                 "message": "Hệ thống gặp lỗi, vui lòng thử lại sau."}
+    assert "Ollama" not in r.text and "11434" not in r.text   # không lộ chi tiết
+
+
+def test_swagger_co_nut_authorize():
+    schema = TestClient(app).get("/openapi.json").json()
+    assert "HTTPBearer" in schema["components"]["securitySchemes"]

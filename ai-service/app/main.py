@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from langchain_core.messages import HumanMessage
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
+from fastapi.exceptions import RequestValidationError
 
 from app.clients import ToolResult, close_backend_client, get_backend_client
 from app.config import settings
@@ -38,8 +39,17 @@ if langfuse_enabled:
     )
 
 
-def get_callbacks() -> list:
-    return [CallbackHandler()] if langfuse_enabled else []
+def _tracing(user: UserContext, session_id: int) -> tuple[list, dict, str | None]:
+    """Tạo trước trace_id rồi gắn vào CallbackHandler -> biết chắc id của trace lượt này.
+    Trả (callbacks, metadata, trace_id). Langfuse tắt -> ([], {}, None)."""
+    if not langfuse_enabled:
+        return [], {}, None
+    trace_id = Langfuse.create_trace_id()
+    handler = CallbackHandler(trace_context={"trace_id": trace_id})
+    # Langfuse đọc 2 khóa này để gom trace theo phiên / người dùng (Sessions, Users)
+    metadata = {"langfuse_session_id": str(session_id),
+                "langfuse_user_id": str(user.user_id)}
+    return [handler], metadata, trace_id
 
 
 # ==========================================
@@ -114,9 +124,11 @@ async def chat_endpoint(payload: ChatRequest,
         _raise_from(r)
 
     # 3. Chạy graph trên thread riêng của (user, phiên)
+    callbacks, metadata, trace_id = _tracing(user, session_id)
     run_config = {
         "configurable": {"thread_id": f"{user.user_id}:{session_id}", "user": user},
-        "callbacks": get_callbacks(),
+        "callbacks": callbacks,
+        "metadata": metadata,
     }
     try:
         final_state = await graph.ainvoke(_new_turn(question), config=run_config)
@@ -126,7 +138,6 @@ async def chat_endpoint(payload: ChatRequest,
 
     answer = final_state.get("answer") or "Xin lỗi, hệ thống không thể tạo câu trả lời."
     intent = final_state.get("intent")
-    trace_id = None            # TODO bước 4: lấy từ Langfuse
     sources: list = []         # Phase 2 (RAG)
 
     # 4. Lưu tin trả lời. Lỗi ở đây không làm mất câu trả lời: vẫn trả về, chỉ ghi log.
@@ -155,9 +166,39 @@ def health_check():
     return {"status": "ok"}
 
 
+# ==========================================
+# Xử lý lỗi: mọi lỗi đều trả {success:false, data:null, error:{code,message}}
+# ==========================================
+
+def _error(status: int, code: str, message: str) -> JSONResponse:
+    return JSONResponse(status_code=status,
+                        content={"success": False, "data": None,
+                                 "error": {"code": code, "message": message}})
+
+
 @app.exception_handler(HTTPException)
 async def http_error_handler(request: Request, exc: HTTPException):
-    error = exc.detail if isinstance(exc.detail, dict) else \
-            {"code": "INTERNAL_ERROR", "message": str(exc.detail)}
-    return JSONResponse(status_code=exc.status_code,
-                        content={"success": False, "data": None, "error": error})
+    if isinstance(exc.detail, dict):
+        return _error(exc.status_code, exc.detail.get("code", "INTERNAL_ERROR"),
+                      exc.detail.get("message", GENERIC_ERROR_MSG))
+    if exc.status_code >= 500:
+        return _error(exc.status_code, "INTERNAL_ERROR", GENERIC_ERROR_MSG)
+    code = {400: "VALIDATION_ERROR", 401: "UNAUTHORIZED", 403: "PERMISSION_DENIED",
+            404: "NOT_FOUND"}.get(exc.status_code, "VALIDATION_ERROR")
+    return _error(exc.status_code, code, str(exc.detail))
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    # 422 mặc định của FastAPI là {"detail":[...]} -> đổi về định dạng chung
+    first = exc.errors()[0] if exc.errors() else {}
+    field = ".".join(str(x) for x in first.get("loc", []) if x != "body")
+    msg = f"Dữ liệu không hợp lệ: {field}" if field else "Dữ liệu không hợp lệ."
+    return _error(422, "VALIDATION_ERROR", msg)
+
+
+@app.exception_handler(Exception)
+async def unhandled_error_handler(request: Request, exc: Exception):
+    # Lỗi không lường trước: ghi đủ stack trace vào log, client chỉ thấy câu chung
+    log.exception("Lỗi không xử lý: %s %s", request.method, request.url.path)
+    return _error(500, "INTERNAL_ERROR", GENERIC_ERROR_MSG)
