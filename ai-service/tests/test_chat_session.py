@@ -27,7 +27,7 @@ def fake_llm(monkeypatch, replies):
 
 
 def test_tao_phien_moi_va_tra_du_truong(monkeypatch):
-    fake_llm(monkeypatch, ['{"tool_name": "list_my_requests"}', "Bạn có 2 đơn."])
+    fake_llm(monkeypatch, ['{"tool_name": "list_my_requests"}'])
 
     r = TestClient(app).post("/chat", json={"message": "danh sách đơn của tôi"}, headers=header())
 
@@ -37,14 +37,14 @@ def test_tao_phien_moi_va_tra_du_truong(monkeypatch):
                          "router_tier", "sources", "trace_id"}
     assert isinstance(body["session_id"], int)
     assert isinstance(body["message_id"], int)
-    assert body["answer"] == "Bạn có 2 đơn."
+    assert body["answer"].startswith("Bạn có 2 đơn:")
     assert body["intent"] == "list_my_requests"
     assert body["router_tier"] is None and body["sources"] == []
 
 
 def test_hai_luot_cung_phien_nho_ngu_canh(monkeypatch):
-    fake_llm(monkeypatch, ['{"tool_name": "list_my_requests"}', "Lượt 1",
-                           '{"tool_name": "chitchat"}', "Lượt 2"])
+    fake_llm(monkeypatch, ['{"tool_name": "list_my_requests"}',
+                       '{"tool_name": "chitchat"}', "Lượt 2"])
     client, h = TestClient(app), header()
 
     r1 = client.post("/chat", json={"message": "danh sách đơn của tôi"}, headers=h)
@@ -52,8 +52,8 @@ def test_hai_luot_cung_phien_nho_ngu_canh(monkeypatch):
     r2 = client.post("/chat", json={"message": "cảm ơn", "session_id": sid}, headers=h)
 
     assert r2.json()["session_id"] == sid
-    assert r1.json()["answer"] == "Lượt 1"
-    assert r2.json()["answer"] == "Lượt 2"          # không lặp lại answer lượt 1
+    assert r1.json()["answer"].startswith("Bạn có 2 đơn:")
+    assert r2.json()["answer"] == "Lượt 2"            # không lặp lại answer lượt 1
 
     snap = graph.get_state({"configurable": {"thread_id": f"3:{sid}"}})
     assert len(snap.values["messages"]) == 4        # 2 lượt x (Human + AI)
@@ -135,3 +135,31 @@ def test_graph_loi_tra_500_thong_bao_chung(monkeypatch):
 def test_swagger_co_nut_authorize():
     schema = TestClient(app).get("/openapi.json").json()
     assert "HTTPBearer" in schema["components"]["securitySchemes"]
+
+class RecordingLLM:
+    """LLM giả ghi lại các message nhận được, để kiểm lịch sử có được đưa vào prompt."""
+    def __init__(self, replies):
+        self.replies, self.calls = iter(replies), []
+
+    async def ainvoke(self, messages):
+        from langchain_core.messages import AIMessage
+        self.calls.append(messages)
+        return AIMessage(content=next(self.replies))
+
+
+def test_cau_noi_dung_lich_su(monkeypatch):
+    llm = RecordingLLM(['{"tool_name": "list_my_requests"}',
+                        '{"tool_name": "get_request_status", "request_id": 102}'])
+    monkeypatch.setattr(nodes, "get_llm", lambda temperature=0.0: llm)
+    client, h = TestClient(app), header()
+
+    sid = client.post("/chat", json={"message": "danh sách đơn của tôi"}, headers=h).json()["session_id"]
+    r = client.post("/chat", json={"message": "còn đơn thứ hai thì sao?", "session_id": sid}, headers=h)
+
+    # Lượt 2: prompt nhận diện ý định có chứa câu trả lời lượt 1 (danh sách đánh số, có #102)
+    prompt_luot_2 = "\n".join(m.content for m in llm.calls[-1])
+    assert "danh sách đơn của tôi" in prompt_luot_2
+    assert "2. **#102**" in prompt_luot_2
+    # ...nên chọn đúng đơn #102
+    assert r.json()["intent"] == "get_request_status"
+    assert r.json()["answer"].startswith("Đơn #102")

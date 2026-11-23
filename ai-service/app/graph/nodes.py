@@ -3,7 +3,7 @@ import re
 import unicodedata
 from typing import Literal, Optional, Dict, Any
 from pydantic import BaseModel, Field
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, BaseMessage
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnableConfig
 from app.core.security import UserContext
@@ -85,6 +85,10 @@ Quy tắc ánh xạ Tool:
 8. "chitchat": Chào hỏi, cảm ơn, giao tiếp xã giao thông thường.
 9. "unknown": Câu hỏi không rõ ràng, không liên quan đến công việc.
 
+Ngữ cảnh hội thoại: các tin nhắn trước (nếu có) là lịch sử của cùng phiên. Nếu câu hỏi hiện tại
+tham chiếu tới nội dung trước đó (ví dụ "đơn thứ hai", "đơn đó", "còn cái kia thì sao?"), hãy dùng
+lịch sử để suy ra tool và request_id. Danh sách đơn trong lịch sử được đánh số "1.", "2.", ... kèm mã "#<id>".
+
 Cấu trúc JSON yêu cầu:
 {format_instructions}
 """
@@ -143,6 +147,15 @@ def _rule_intent(question: str) -> Optional[Dict[str, Any]]:
 
     return None
 
+HISTORY_TURNS = 3   # số lượt gần nhất (user + assistant) đưa vào prompt
+
+
+def _history(state: NodeState) -> list[BaseMessage]:
+    """Lịch sử của phiên, BỎ tin hiện tại (luôn nằm cuối), chỉ giữ vài lượt gần nhất
+    để prompt không phình theo độ dài phiên."""
+    msgs = state.get("messages") or []
+    return list(msgs[:-1][-HISTORY_TURNS * 2:])
+
 async def detect_intent(state: NodeState) -> Dict[str, Any]:
     question = state.get("question") or (
         state["messages"][-1].content if state.get("messages") else ""
@@ -166,6 +179,7 @@ async def detect_intent(state: NodeState) -> Dict[str, Any]:
 
     messages = [
         SystemMessage(content=formatted_system),
+        *_history(state),
         HumanMessage(content=f"Yêu cầu: \"{question}\"")
     ]
 
@@ -245,6 +259,16 @@ _STATUS_VI = {"Pending": "Chờ phê duyệt", "Approved": "Đã phê duyệt",
               "Rejected": "Bị từ chối", "Cancelled": "Đã hủy", "Draft": "Nháp"}
 
 def _template_answer(intent: str, data: Any) -> Optional[str]:
+    if intent == "list_my_requests" and isinstance(data, list):
+        if not data:
+            return "Bạn chưa có đơn nào."
+        lines = [f"Bạn có {len(data)} đơn:"]
+        for i, r in enumerate(data, 1):
+            status = _STATUS_VI.get(r.get("status"), r.get("status") or "Không rõ")
+            lines.append(f"{i}. **#{r.get('id')}** – {r.get('title') or r.get('request_type')}"
+                         f" – {status} ({str(r.get('created_at') or '')[:10]})")
+        return "\n".join(lines)
+    
     if not isinstance(data, dict):
         return None
 
@@ -308,6 +332,7 @@ async def generate_answer_node(state: NodeState) -> Dict[str, Any]:
 
     messages = [
         SystemMessage(content=ANSWER_SYSTEM_PROMPT),
+        *_history(state),
         HumanMessage(content=prompt_content)
     ]
 
