@@ -1,6 +1,7 @@
 import itertools
 from typing import Optional
 from app.clients.types import ToolResult, NOT_FOUND_MSG
+import jwt
 
 _REQUESTS = [
     {"id": 101, "request_type": "Leave", "title": "Đơn xin nghỉ phép",
@@ -10,6 +11,10 @@ _REQUESTS = [
 ]
 _ids = itertools.count(1)
 
+_session_owner: dict[int, str] = {}
+def _sub(token: str) -> str:
+    """Mock chỉ cần biết ai gọi; chữ ký đã được core/security.py kiểm trước đó."""
+    return str(jwt.decode(token, options={"verify_signature": False})["sub"])
 
 class MockBackendClient:
     async def aclose(self) -> None: ...
@@ -33,7 +38,11 @@ class MockBackendClient:
                               "fields": []})
 
     async def create_session(self, token, title: Optional[str] = None):
-        return ToolResult.ok({"session_id": next(_ids)})
+        session_id = next(_ids)
+        _session_owner[session_id] = _sub(token)
+        return ToolResult.ok({"session_id": session_id})
 
     async def save_message(self, token, session_id, role, content, **kw):
+        if _session_owner.get(session_id) != _sub(token):
+            return ToolResult.fail("NOT_FOUND", "Không tìm thấy phiên trò chuyện.")
         return ToolResult.ok({"message_id": next(_ids)})

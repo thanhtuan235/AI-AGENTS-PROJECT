@@ -1,5 +1,7 @@
 from typing import Literal
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.types import Checkpointer
 
 from app.graph.state import NodeState
 from app.graph.nodes import (
@@ -48,7 +50,7 @@ def route_intent(state: NodeState) -> RouteTarget:
 # 2. Build & Compile StateGraph
 # ==========================================
 
-def build_graph():
+def build_graph(checkpointer: Checkpointer = None):
     builder = StateGraph(NodeState)
 
     builder.add_node("detect_intent", detect_intent)
@@ -89,6 +91,7 @@ def build_graph():
 
     builder.add_edge("generate_answer_node", END)
 
-    return builder.compile()
+    return builder.compile(checkpointer=checkpointer)
 
-graph = build_graph()
+checkpointer = MemorySaver()
+graph = build_graph(checkpointer)

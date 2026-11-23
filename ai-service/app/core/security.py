@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import jwt
-from fastapi import Header, HTTPException
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.config import settings
 
 
@@ -17,10 +18,14 @@ def _unauthorized(message: str = "Phiên đăng nhập không hợp lệ."):
                         detail={"code": "UNAUTHORIZED", "message": message})
 
 
-async def get_current_user(authorization: str | None = Header(None)) -> UserContext:
-    if not authorization or not authorization.startswith("Bearer "):
+_bearer = HTTPBearer(auto_error=False)
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> UserContext:
+    if credentials is None or credentials.scheme.lower() != "bearer":
         _unauthorized("Thiếu token.")
-    token = authorization.removeprefix("Bearer ").strip()
+    token = credentials.credentials.strip()
     try:
         claims = jwt.decode(
             token, settings.jwt_key, algorithms=["HS256"],

@@ -5,7 +5,6 @@ from langgraph.graph.message import add_messages
 
 class NodeState(TypedDict):
     question: str
-    access_token: str 
     
     intent: Optional[str]
 
