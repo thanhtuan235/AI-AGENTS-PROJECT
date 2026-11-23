@@ -11,6 +11,7 @@ from langchain_core.messages import HumanMessage
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from pydantic import BaseModel
+from app.schemas import ChatRequest
 
 import logging
 log = logging.getLogger(__name__)
@@ -43,12 +44,8 @@ def get_callbacks() -> list:
 
 
 # ==========================================
-# Schema Request / Response
+# Schema Response
 # ==========================================
-
-class ChatRequest(BaseModel):
-    message: str
-    session_id: Optional[str] = None
 class ChatResponse(BaseModel):
     answer: str
     intent: Optional[str] = None
@@ -63,22 +60,29 @@ class ChatResponse(BaseModel):
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(payload: ChatRequest,
-                        user: UserContext = Depends(get_current_user),
-                        authorization: str | None = Header(None)):
+                        user: UserContext = Depends(get_current_user)):
     question = payload.message.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Nội dung câu hỏi không được để trống")
 
     # get_current_user đã kiểm chữ ký -> tới đây chắc chắn header hợp lệ
-    token = authorization.removeprefix("Bearer ").strip()
-
-    initial_state = {
+    turn_input = {
         "question": question,
-        "access_token": token,
+        "intent": None,
+        "tool_name": None,
+        "tool_args": None,
+        "tool_result": None,
+        "answer": None,
         "messages": [HumanMessage(content=question)],
     }
+    # TẠM (bước 3 sẽ thay bằng session_id thật từ Backend)
+    thread_id = f"{user.user_id}:{payload.session_id or 'tmp'}"
+    run_config = {
+        "configurable": {"thread_id": thread_id, "user": user},
+        "callbacks": get_callbacks(),
+    }
     try:
-        final_state = await graph.ainvoke(initial_state, config={"callbacks": get_callbacks()})
+        final_state = await graph.ainvoke(turn_input, config=run_config)
         return ChatResponse(
             answer=final_state.get("answer") or "Xin lỗi, hệ thống không thể tạo câu trả lời.",
             intent=final_state.get("intent"),

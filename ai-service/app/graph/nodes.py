@@ -5,6 +5,8 @@ from typing import Literal, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.runnables import RunnableConfig
+from app.core.security import UserContext
 
 from app.llm import get_llm
 from app.graph.state import NodeState
@@ -324,9 +326,16 @@ WRITE_DISABLED_MSG = (
     "Bạn vui lòng thao tác trực tiếp trên eOffice."
 )
 
-def _token(state: NodeState) -> str:
-    """Lấy JWT người dùng từ state. Không bao giờ lấy từ tool_args (LLM sinh)."""
-    return state["access_token"]
+def _user(config: RunnableConfig) -> UserContext:
+    """Lấy người dùng từ config["configurable"] (main.py gắn vào).
+    Không bao giờ lấy từ state hay tool_args: LLM đọc/ghi được những chỗ đó."""
+    user = (config.get("configurable") or {}).get("user")
+    if user is None:
+        raise RuntimeError("Thiếu 'user' trong config['configurable']")
+    return user
+
+def _token(config: RunnableConfig) -> str:
+    return _user(config).token
 
 def _result(r: ToolResult) -> Dict[str, Any]:
     """Đổi ToolResult -> dict để LangGraph/Langfuse serialize được."""
@@ -344,13 +353,13 @@ async def search_documents_node(state: NodeState) -> Dict[str, Any]:
     return _result(ToolResult.ok([]))
 
 # 2. Get Status Node
-async def get_request_status_node(state: NodeState) -> Dict[str, Any]:
+async def get_request_status_node(state: NodeState, config: RunnableConfig) -> Dict[str, Any]:
     args = state.get("tool_args") or {}
     req_id = _parse_id(args.get("request_id"))
     if req_id is None:
         return _result(ToolResult.fail(
             "VALIDATION_ERROR", "Bạn cho mình xin mã đơn cần tra cứu nhé."))
-    r = await get_backend_client().get_request(_token(state), req_id)
+    r = await get_backend_client().get_request(_token(config), req_id)
     return _result(r)
 
 # 3. Create Request Node
@@ -363,17 +372,17 @@ async def create_request_node(state: NodeState) -> Dict[str, Any]:
     raise NotImplementedError("create_request: làm ở Phase 1")
 
 # 4. Get Form Template Node
-async def get_form_template_node(state: NodeState) -> Dict[str, Any]:
+async def get_form_template_node(state: NodeState, config: RunnableConfig) -> Dict[str, Any]:
     args = state.get("tool_args") or {}
     form_type = args.get("form_type") or "Leave"
-    r = await get_backend_client().get_form(_token(state), form_type)
+    r = await get_backend_client().get_form(_token(config), form_type)
     return _result(r)
 
 # 5. List Requests Node
-async def list_my_requests_node(state: NodeState) -> Dict[str, Any]:
+async def list_my_requests_node(state: NodeState, config: RunnableConfig) -> Dict[str, Any]:
     args = state.get("tool_args") or {}
     r = await get_backend_client().list_my_requests(
-        _token(state),
+        _token(config),
         status=args.get("status"),
         request_type=args.get("request_type"),
     )
@@ -389,6 +398,6 @@ async def cancel_request_node(state: NodeState) -> Dict[str, Any]:
     raise NotImplementedError("cancel_request: làm ở Phase 1")
 
 # 7. Get Workflow Steps Node
-async def get_workflow_steps_node(state: NodeState) -> Dict[str, Any]:
+async def get_workflow_steps_node(state: NodeState, config: RunnableConfig) -> Dict[str, Any]:
     # Phase 0 chưa có GET /api/requests/{id}/workflow-steps -> tạm dùng chi tiết đơn
-    return await get_request_status_node(state)
+    return await get_request_status_node(config)
