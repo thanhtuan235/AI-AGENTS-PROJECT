@@ -5,19 +5,18 @@ Thumbs.db
 .vscode/
 *.swp
 
-# === .NET 8 (Backend) ===
-**/bin/
-**/obj/
-**/.vs/
+# === .NET (Backend) ===
+bin/
+obj/
+.vs/
 *.user
 appsettings.Development.json
 
-# === Python & UV (AI Service) ===
+# === Python & uv (AI Service) ===
 __pycache__/
 *.py[cod]
 *$py.class
 .venv/
-.env
 .pytest_cache/
 
 # === Node & Angular (Frontend) ===
@@ -27,7 +26,14 @@ dist/
 npm-debug.log*
 yarn-error.log*
 
-# Claude Code
-CLAUDE.md
+# === Claude Code (cấu hình cá nhân) ===
 CLAUDE.local.md
 .claude/
+CLAUDE.md
+
+# === Secrets ===
+.env
+.env.*
+!.env.example
+
+infra/sql/tests/out/

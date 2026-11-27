@@ -6,6 +6,21 @@ import { Component } from '@angular/core';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
+  chatOpen = true;
+  chatMinimized = false;
+
+  metrics = [
+    { label: 'Hồ sơ đang xử lý', value: '03', note: '01 hồ sơ cần bổ sung', icon: 'inbox', iconClass: '' },
+    { label: 'Phép năm còn lại', value: '08 ngày', note: 'Cập nhật từ Khối Nhân sự', icon: 'event_available', iconClass: 'orange' },
+    { label: 'Lịch họp hôm nay', value: '02', note: 'Cuộc họp tiếp theo lúc 10:30', icon: 'calendar_today', iconClass: 'green' },
+  ];
+
+  recentRequests = [
+    { id: 'TT-2026-00816', content: 'Thanh toán công tác tháng 10', status: 'Đang xử lý', statusClass: 'processing' },
+    { id: 'TB-2026-00189', content: 'Cấp màn hình bổ sung', status: 'Cần bổ sung', statusClass: 'pending' },
+    { id: 'PH-2026-00423', content: 'Đặt phòng họp 05/11', status: 'Đã duyệt', statusClass: 'approved' },
+  ];
+
   // Mock Data Danh sách Tài liệu RAG
   documentColumns: string[] = [
     'title',

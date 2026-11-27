@@ -5,7 +5,7 @@ from langgraph.graph.message import add_messages
 
 class NodeState(TypedDict):
     question: str
-
+    
     intent: Optional[str]
 
     tool_name: Optional[str]
