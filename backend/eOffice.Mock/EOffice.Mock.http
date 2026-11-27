@@ -1,6 +1,0 @@
-@EOffice.Mock_HostAddress = http://localhost:5003
-
-GET {{EOffice.Mock_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
