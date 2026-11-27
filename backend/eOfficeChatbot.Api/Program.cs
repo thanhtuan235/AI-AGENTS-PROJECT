@@ -35,18 +35,17 @@ app.UseCors("AllowAll"); // Áp dụng CORS
 app.UseAuthorization();
 app.MapControllers();
 
-// Khởi chạy quá trình tự động Seed Data
+// Tự động áp dụng migration khi khởi động
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<AppDbContext>();
-    DbSeeder.SeedData(context);
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
 }
 
 // 4. API "Hello World" / Health Check cho Người B và C test
 app.MapGet("/api/health", () => new { 
     Status = "OK", 
-    Message = "eOffice .NET 8 API is running!", 
+    Message = "eOffice .NET 10 API is running!", 
     Timestamp = DateTime.UtcNow 
 });
 
