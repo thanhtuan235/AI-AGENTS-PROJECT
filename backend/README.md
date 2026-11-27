@@ -34,7 +34,7 @@ dotnet run
 ```
 > Ứng dụng tự động chạy `Database.Migrate()` và `DbSeeder.Seed()` khi khởi động. Toàn bộ 14 bảng của `EOfficeMockDb` cùng dữ liệu mẫu (phòng ban, phân quyền, văn bản, biểu mẫu, đơn từ) sẽ được khởi tạo tự động.
 
-- **Swagger UI:** `http://localhost:5200/swagger`
+- **Swagger UI:** `http://localhost:5003/swagger`
 
 ### Bước 3: Khởi chạy `eOfficeChatbot.Api` (Port 5100)
 Mở một terminal khác tại thư mục `eOfficeChatbot.Api` và chạy:
